@@ -9,7 +9,9 @@ export default async function generate(request: Request, response: Response) {
     }
     try {
         const license = await licenseModel.generateNew();
-        return response.status(license ? 200 : 500).json(license);
+        return response.status(license ? 200 : 500).json({
+		liencese
+	});
     } catch (_) {
         return response.status(500).send();
     }

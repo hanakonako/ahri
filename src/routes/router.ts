@@ -10,7 +10,6 @@ import LicenseModel from "@/models/license";
 const router = Router();
 const attachModels = (client: MongoClient) => {
     const licenseModel = new LicenseModel(client);
-  
     return (req: Request, res: Response, next: NextFunction) => {
       req.models = {
         licenseModel,
@@ -35,7 +34,6 @@ const routes = (client: MongoClient) => {
   router.post("/registerHwid/:hwid", registerHwid);
 
   console.log("Rovas ativas.");
-
   return router; 
 };
 

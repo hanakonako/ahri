@@ -3,6 +3,7 @@ import helmet from "helmet";
 import cors from "cors";
 import { MongoClient, ServerApiVersion } from "mongodb";
 import routes from "./routes/router";
+import LicenseModel from "./models/license";
 
 const uri = process.env.DB_URL as string;
 const client = new MongoClient(uri, {
