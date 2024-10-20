@@ -1,8 +1,17 @@
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
-import { connect } from "mongoose";
-import router from "./routes/router";
+import { MongoClient, ServerApiVersion } from "mongodb";
+import routes from "./routes/router";
+
+const uri = process.env.DB_URL as string;
+const client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
 
 const app = express();
 app.use(express.urlencoded({ extended: true, limit: "2mb"}));
@@ -11,18 +20,27 @@ app.use(cors());
 app.use(helmet());
 
 app.listen(process.env.PORT || 5050, async () => {
-    const uri = process.env.DB_URL as string;
+    let dbConnected = false;
     try {
-        await connect(uri, { serverApi: { version: '1', strict: true, deprecationErrors: true } });
-        app.use("/", router);
+        // await connect(uri, { serverApi: { version: '1', strict: true, deprecationErrors: true } });
+        await client.connect();
+        await client.db("test").command({ ping: 1 });
         console.log("Conectado ao banco de dados.");
+        dbConnected = true;
     } catch (error: any) {
-        router.get("/ping", (_, res) => {
+        console.log("Erro ao se conectar ao banco de dados: ", error, error?.stack)
+        dbConnected = false;
+    }
+    if (dbConnected) {
+        app.use("/", routes(client));
+        console.log(`Ativo em ${process.env.PORT || 5050}`);
+    } else {
+        app.use("*", (_, res) => {
             res.status(500).json({
-                message: "Database down"
+                message: "Database offline"
             });
         });
-        console.log("Erro ao se conectar ao banco de dados: ", error, error?.stack)
+        console.log("Database offline");
     }
-    console.log(`Ativo em ${process.env.PORT || 5050}`);
+
 });
