@@ -1,41 +1,132 @@
-export async function webhook(content: string, isEmbed?: boolean, color = 0x0099ff) {
-    if (!process.env.WEBHOOK_URL) {
-      throw new Error("WEBHOOK_URL is not defined");
-    }
-  
-    const webhookUrl = process.env.WEBHOOK_URL;
-  
-    const body = isEmbed ? { content } : { embeds: [{ description: content, color }] };
-    try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+const webhookUrl = process.env.WEBHOOK_URL as string;
+
+export async function registerLogin(hwid: string, approved: boolean) {
+  const body = {
+    content: null,
+    embeds: [
+      {
+        title: "Requisição de autenticação",
+        color: 5814783,
+        fields: [
+          {
+            name: "HWID",
+            value: `\`${hwid}\``,
+            inline: true,
+          },
+          {
+            name: "Resposta:",
+            value: `\`${approved}\``,
+            inline: true,
+          },
+        ],
+        footer: {
+          text: "Via CYBER API",
         },
-        body: JSON.stringify(body),
-      });
-  
-      if (!response.ok) throw response.statusText;
-    } catch (error) {
-      console.error("Error sending webhook:", error);
-    } finally {
-      console.log(`${new Date().toISOString()} - Webhook logging request sent`);
-    }
+        timestamp: "2024-10-20T02:07:00.000Z",
+      },
+    ],
+    username: "Autenticação",
+    attachments: [],
+  };
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw response.statusText;
+  } catch (error) {
+    console.error("Error sending webhook:", error);
+  } finally {
+    console.log(`${new Date().toISOString()} - Webhook logging request sent`);
   }
-  
-  export async function testLogging() {
-    try {
-      await webhook("Test logging", true);
-      return true;
-    } catch (_) {
-      return false;
-    }
+}
+
+export async function registerHwidUpdate(oldHwid: string, newHwid: string, license: string) {
+  const body = {
+    content: null,
+    embeds: [
+      {
+        title: "Alteração de HWID feita",
+        color: 5814783,
+        fields: [
+          {
+            name: "HWID ANTIGO",
+            value: `\`${oldHwid}\``,
+          },
+          {
+            name: "HWID NOVO",
+            value: `\`${newHwid}\``,
+          },
+          {
+            name: "LICENÇA",
+            value: `\`${license}\``,
+          },
+        ],
+        footer: {
+          text: "Via CYBER API",
+        },
+        timestamp: new Date().toISOString(),
+      },
+    ],
+    username: "Licenças",
+    attachments: [],
+  };
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw response.statusText;
+  } catch (error) {
+    console.error("Error sending webhook:", error);
+  } finally {
+    console.log(`${new Date().toISOString()} - Webhook logging request sent`);
   }
-  
-  export async function newLogin(hwid: string) {
-    try {
-      await webhook(`Novo log-in: ${hwid}`, true, 0x00ff00);
-    } catch (_) {
-      console.log(`Error while logging new login: ${hwid}`);
-    }
+}
+
+export async function logNewLicense(license: string) {
+  const body = {
+    content: null,
+    embeds: [
+      {
+        title: "Nova licença gerada!",
+        color: 5814783,
+        fields: [
+          {
+            name: "Licença",
+            value: `\`${license}\``,
+            inline: true,
+          },
+        ],
+        footer: {
+          text: "Via CYBER API",
+        },
+        timestamp: "2024-10-20T02:07:00.000Z",
+      },
+    ],
+    username: "Licenças",
+    attachments: [],
+  };
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw response.statusText;
+  } catch (error) {
+    console.error("Error sending webhook:", error);
+  } finally {
+    console.log(`${new Date().toISOString()} - Webhook logging request sent`);
   }
+}

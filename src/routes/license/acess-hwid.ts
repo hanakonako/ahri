@@ -1,4 +1,3 @@
-import { newLogin } from "@/services/webhook";
 import type { Request, Response } from "express";
 
 export default async function acessHwid(request: Request, response: Response) {
@@ -9,7 +8,6 @@ export default async function acessHwid(request: Request, response: Response) {
     try {
         const isLoginValid = await licenseModel.validateHwid(hwid);
         if (isLoginValid) {
-            await newLogin(hwid);
             return response.status(200).json({
                 message: "Login aprovado."
             });

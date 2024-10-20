@@ -1,3 +1,4 @@
+import { logNewLicense, registerHwidUpdate, registerLogin } from "@/services/webhook";
 import type { MongoClient, Document, Collection } from "mongodb";
 import { nanoid } from "nanoid";
 
@@ -30,7 +31,7 @@ export default class LicenseModel {
 
     constructor(client: MongoClient) {
         this.client = client;
-        this.collection = this.client.db("test").collection("license");
+        this.collection = this.client.db("test").collection("licenses");
     }
 
     async generateNew() {
@@ -40,7 +41,9 @@ export default class LicenseModel {
                 licenseBlob,
                 newType: true
             });
+            await logNewLicense(licenseBlob);
             return licenseBlob;
+            
         } catch (error: any) {
             console.log(`❌ Erro ao gerar licença: ${error} - ${error.stack}`);
             return "";
@@ -66,6 +69,7 @@ export default class LicenseModel {
                 return LICENSE_UPDATE.LOCKED;
             }
 
+            const oldHwid = document.linkedHwid;
             if (!document.expirestAt) {
                 await this.collection.updateOne({
                     licenseBlob: license
@@ -85,7 +89,7 @@ export default class LicenseModel {
                     lastRegister: Date.now()
                 }
             });
-
+            await registerHwidUpdate((oldHwid || ""), hwid, license);
             return LICENSE_UPDATE.SUCESS;
         } catch (error: any) {
             console.log(`❌ Erro ao atualizar hwid da licença ${license}: ${error} - ${error.stack}`);
@@ -97,14 +101,18 @@ export default class LicenseModel {
         try {
             const licenseDetails = await this.collection.findOne({ linkedHwid: hwid });
             if (!licenseDetails) {
+                await registerLogin(hwid, false);
                 return false;
             }
             if (!licenseDetails?.expirestAt) {
+                await registerLogin(hwid, true);
                 return true;
             }
             if (isTimestampInPast(licenseDetails.expirestAt)) {
+                await registerLogin(hwid, false);
                 return false;
             }
+            await registerLogin(hwid, true);
             return true;
         } catch (error: any) {
             console.log(`Erro na validação do hwid ${hwid}: ${error} - ${error.stack}`);
