@@ -6,6 +6,7 @@ import acessHwid from "./license/acess-hwid";
 import registerHwid from "./license/register-hwid";
 import type { MongoClient } from "mongodb";
 import LicenseModel from "@/models/license";
+import expiresAt from "./license/expires";
 
 const router = Router();
 const attachModels = (client: MongoClient) => {
@@ -29,6 +30,7 @@ const routes = (client: MongoClient) => {
   router.use(attachModels(client));
 
   router.get("/license/:license", licenseInfo);
+  router.get("/licenseExpires/:license", expiresAt);
   router.post("/license/new", generate);
   router.get("/validateHwid/:hwid", acessHwid);
   router.post("/registerHwid/:hwid", registerHwid);

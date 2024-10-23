@@ -126,7 +126,7 @@ export default class LicenseModel {
             return document;
         } catch (error: any) {
             console.log(`Falha ao obter licença ${license}: ${error} - ${error.stack}`);
-            return {};
+            return null;
         }
     }
 }
