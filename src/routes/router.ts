@@ -30,7 +30,7 @@ const routes = (client: MongoClient) => {
   router.use(attachModels(client));
 
   router.get("/license/:license", licenseInfo);
-  router.get("/licenseExpires/:license", expiresAt);
+  router.get("/acessEndat/:hwid", expiresAt);
   router.post("/license/new", generate);
   router.get("/validateHwid/:hwid", acessHwid);
   router.post("/registerHwid/:hwid", registerHwid);

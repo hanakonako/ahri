@@ -120,12 +120,17 @@ export default class LicenseModel {
         }
     }
 
-    async getLicense(license: string) {
+    async getLicense(findParam: string, isHwid: boolean) {
         try {
-            const document = await this.collection.findOne({ licenseBlob: license });
-            return document;
+            if (!isHwid) {
+                const document = await this.collection.findOne({ licenseBlob: findParam });
+                return document;
+            } else {
+                const document = await this.collection.findOne({ linkedHwid: findParam });
+                return document;
+            }
         } catch (error: any) {
-            console.log(`Falha ao obter licença ${license}: ${error} - ${error.stack}`);
+            console.log(`Falha ao obter licença ${findParam} (${isHwid}): ${error} - ${error.stack}`);
             return null;
         }
     }

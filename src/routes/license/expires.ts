@@ -1,12 +1,12 @@
 import type { Request, Response } from "express";
 
 export default async function expiresAt(request: Request, response: Response) {
-  const licenseInfo = request.params.license;
+  const licenseInfo = request.params.hwid;
   const { licenseModel } = request.models;
 
   try {
-    const license = await licenseModel.getLicense(licenseInfo);
-    if (!license?.linkedHwid) { 
+    const license = await licenseModel.getLicense(licenseInfo, true);
+    if (!license || !license.linkedHwid) { 
         return response.status(404).send("");
     }
     if (license?.expirestAt) {
