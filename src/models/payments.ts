@@ -2,6 +2,7 @@ import { createPayment, getPaymentStatus } from "@/services/payments";
 import { logNewLicense, registerHwidUpdate, registerLogin } from "@/services/webhook";
 import type { MongoClient, Document, Collection } from "mongodb";
 import { nanoid } from "nanoid";
+import { inspect } from "util";
 
 export enum LICENSE_UPDATE {
     NOT_FOUND = 0,
@@ -55,7 +56,7 @@ export default class PaymentModel {
             }
             return null;
         } catch (error: any) {
-            console.log(`❌ Erro ao gerar licença: ${error} - ${error.stack}`);
+            console.log(`❌ Erro ao gerar pagamento: ${inspect(error, true, 10)}`);
             return null;
         }
     }
