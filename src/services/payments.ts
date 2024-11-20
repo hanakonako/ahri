@@ -25,9 +25,10 @@ export const createPayment = async (name: string, email: string, duration = 1) =
         throw new TypeError("A duração é um número inteiro, maior ou igual a 1 e menor ou igual que 6.");
     }
     const { finalPrice } = calculatePrice(duration);
+    const productPrice = process.env.MODE === "DEV" ? 0.01 : finalPrice;
     const paymentData = await payment.create({
         body: {
-            transaction_amount: finalPrice,
+            transaction_amount: productPrice,
             payment_method_id: 'pix',
             description: `Licença de ${duration*30} dias`,
             payer: {
