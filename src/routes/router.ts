@@ -9,7 +9,6 @@ import type { MongoClient } from "mongodb";
 import LicenseModel from "@/models/license";
 import expiresAt from "./license/expires";
 import PaymentModel from "@/models/payments";
-import { postPayment } from "@/services/payments";
 import { createPaymentR } from "./payments/create";
 
 const router = Router();
