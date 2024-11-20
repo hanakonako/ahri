@@ -33,7 +33,12 @@ export default class PaymentModel {
         this.client = client;
         this.collection = this.client.db("test").collection("payments");
     }
-
+    async delete(payment_id: number) {
+        try {
+            await this.collection.deleteOne({ mp_id: payment_id });
+        } catch (error) {
+        }
+    }
     async generate(name: string, email: string, months: number) {
         try {
             const mp_payment = await createPayment(name, email, months);
@@ -42,7 +47,7 @@ export default class PaymentModel {
                     buyer: name,
                     mp_id: mp_payment.paymentId,
                     buyer_email: email,
-                    payment_method:PAYMENT_METHOD.PIX,
+                    payment_method: PAYMENT_METHOD.PIX,
                     createdAtTimestamp: Date.now(),
                     quantity: months
                 });
