@@ -17,6 +17,8 @@ interface License extends Document {
     lastRegister?: number;
     expirestAt?: number;
     newType?: boolean;
+    duration?: number;
+    email?: string;
 }
 
 const aDay = 86400000;
@@ -34,16 +36,18 @@ export default class LicenseModel {
         this.collection = this.client.db("test").collection("licenses");
     }
 
-    async generateNew() {
+    async generateNew(duration = 1, email?: string) {
         try {
             const licenseBlob = nanoid();
             await this.collection.insertOne({
                 licenseBlob,
-                newType: true
+                newType: true,
+                email,
+                duration
             });
             await logNewLicense(licenseBlob);
             return licenseBlob;
-            
+
         } catch (error: any) {
             console.log(`❌ Erro ao gerar licença: ${error} - ${error.stack}`);
             return "";
@@ -61,7 +65,7 @@ export default class LicenseModel {
             const document = await this.collection.findOne({
                 licenseBlob: license
             });
-            
+
             if (!document) {
                 return LICENSE_UPDATE.NOT_FOUND;
             }
@@ -75,7 +79,7 @@ export default class LicenseModel {
                     licenseBlob: license
                 }, {
                     $set: {
-                        expirestAt: addDays(30),
+                        expirestAt: addDays((30 * (document.duration || 1))),
                         newType: true
                     }
                 });
@@ -135,40 +139,3 @@ export default class LicenseModel {
         }
     }
 }
-
-/*
-import { model, Schema, SchemaType, Types } from "mongoose";
-import type { Document  } from "mongoose";
-import { nanoid } from "nanoid";
-
-
-
-const LicenseSchema = new Schema<License>({
-    linkedHwid: String,
-    lastAcess: Number,
-    licenseBlob: {
-        unique: true,
-        type: String,
-        required: true,
-        default: () => {
-            return nanoid();
-        }
-    },
-    lastRegister: Number,
-}, {
-    timestamps: true
-});
-
-LicenseSchema.pre("save", function(next) {
-    if (this.isNew) {
-        next();
-    }
-    if (this.isModified("linkedHwid")) {
-        this.lastRegister = Date.now();
-    }
-    next();
-});
-
-const LicenseModel = model("license", LicenseSchema);
-export default LicenseModel;
-*/

@@ -22,7 +22,7 @@ export async function registerLogin(hwid: string, approved: boolean) {
         footer: {
           text: "Via CYBER API",
         },
-        timestamp: "2024-10-20T02:07:00.000Z",
+        timestamp: new Date().toISOString(),
       },
     ],
     username: "Autenticação",
@@ -109,7 +109,103 @@ export async function logNewLicense(license: string) {
         footer: {
           text: "Via CYBER API",
         },
-        timestamp: "2024-10-20T02:07:00.000Z",
+        timestamp: new Date().toISOString(),
+      },
+    ],
+    username: "Licenças",
+    attachments: [],
+  };
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw response.statusText;
+  } catch (error) {
+    console.error("Error sending webhook:", error);
+  } finally {
+    console.log(`${new Date().toISOString()} - Webhook logging request sent`);
+  }
+}
+
+export async function mpPayment(name: string, email: string, duration: number) {
+  const body = {
+    content: null,
+    embeds: [
+      {
+        title: "Pagamento gerado via Mercado Pago.",
+        color: 5814783,
+        fields: [
+          {
+            name: "Pagador",
+            value: `\`${name}\``,
+          },
+          {
+            name: "E-mail",
+            value: `\`${email}\``,
+          },
+          {
+            name: "Duração",
+            value: `\`${email}\``,
+          },
+        ],
+        footer: {
+          text: "Via CYBER API",
+        },
+        timestamp: new Date().toISOString(),
+      },
+    ],
+    username: "Mercado Pago",
+    attachments: [],
+  };
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw response.statusText;
+  } catch (error) {
+    console.error("Error sending webhook:", error);
+  } finally {
+    console.log(`${new Date().toISOString()} - Webhook logging request sent`);
+  }
+}
+
+export async function logPayment(license: string, name: string, email: string) {
+  const body = {
+    content: null,
+    embeds: [
+      {
+        title: "Nova licença gerada a partir de pagamento.",
+        color: 5814783,
+        fields: [
+          {
+            name: "Licença",
+            value: `\`${license}\``,
+            inline: true,
+          },
+          {
+            name: "Nome",
+            value: `\`${name}\``,
+            inline: true,
+          },
+          {
+            name: "E-mail",
+            value: `\`${email}\``,
+            inline: true,
+          }
+        ],
+
+        footer: {
+          text: "Via CYBER API",
+        },
+        timestamp: new Date().toISOString(),
       },
     ],
     username: "Licenças",
