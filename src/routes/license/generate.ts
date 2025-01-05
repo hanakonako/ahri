@@ -20,7 +20,8 @@ export default async function registerHwid(request: Request, response: Response)
       if (!data) {
         return response.status(400).json({ message: "Pagamento não existe ou código expirou" });
       }
-      const license = await licenseModel.generateNew(data?.quantity, data?.buyer_email);
+      const game = data.game || "overwatch";
+      const license = await licenseModel.generateNew(data?.quantity, data?.buyer_email, game as "overwatch" | "marvel");
       await paymentModel.delete(mp_id);
       return response.status(200).json({license});
     } catch (_) {

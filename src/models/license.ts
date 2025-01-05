@@ -18,6 +18,7 @@ interface License extends Document {
     expirestAt?: number;
     newType?: boolean;
     duration?: number;
+    game: "overwatch" | "marvel";
     email?: string;
 }
 
@@ -36,14 +37,15 @@ export default class LicenseModel {
         this.collection = this.client.db("test").collection("licenses");
     }
 
-    async generateNew(duration = 1, email?: string) {
+    async generateNew(duration = 1, email?: string, game?: "overwatch" | "marvel") {
         try {
             const licenseBlob = nanoid();
             await this.collection.insertOne({
                 licenseBlob,
                 newType: true,
                 email,
-                duration
+                duration,
+                game: game || "overwatch"
             });
             await logNewLicense(licenseBlob);
             return licenseBlob;
@@ -56,19 +58,21 @@ export default class LicenseModel {
 
     async setHwid(license: string, hwid: string): Promise<LICENSE_UPDATE>  {
         try {
-            const hwidAlreadyRegistred = !!(await this.collection.findOne({
-                linkedHwid: hwid
-            }));
-            if (hwidAlreadyRegistred) {
-                return LICENSE_UPDATE.NOT_VALID;
-            }
             const document = await this.collection.findOne({
-                licenseBlob: license
+                licenseBlob: license,
             });
-
             if (!document) {
                 return LICENSE_UPDATE.NOT_FOUND;
             }
+            const alreadyRegisterdLicense = this.collection.find({ linkedHwid: hwid });
+            const registredLicenses = await alreadyRegisterdLicense.toArray();
+            for (let index = 0; index < registredLicenses.length; index++) {
+                const license = registredLicenses[index];
+                if(license.game === document?.game) {
+                    return LICENSE_UPDATE.NOT_VALID;
+                }   
+            }
+
             if (document.lastRegister && !hasDaysPassed(document.lastRegister, 1)) {
                 return LICENSE_UPDATE.LOCKED;
             }
@@ -86,14 +90,14 @@ export default class LicenseModel {
             }
 
             await this.collection.updateOne({
-                licenseBlob: license
-            }, {
+                licenseBlob: license,
+                            }, {
                 $set: {
                     linkedHwid: hwid,
                     lastRegister: Date.now()
                 }
             });
-            await registerHwidUpdate((oldHwid || ""), hwid, license);
+            await registerHwidUpdate((oldHwid || ""), hwid, license, document.game);
             return LICENSE_UPDATE.SUCESS;
         } catch (error: any) {
             console.log(`❌ Erro ao atualizar hwid da licença ${license}: ${error} - ${error.stack}`);
@@ -101,9 +105,9 @@ export default class LicenseModel {
         }
     }
 
-    async validateHwid(hwid: string, premium: boolean) {
+    async validateHwid(hwid: string, premium: boolean, game: "overwatch" | "marvel") {
         try {
-            const licenseDetails = await this.collection.findOne({ linkedHwid: hwid });
+            const licenseDetails = await this.collection.findOne({ linkedHwid: hwid, game });
             if (!licenseDetails) {
                 await registerLogin(hwid, false);
                 return false;
@@ -113,7 +117,7 @@ export default class LicenseModel {
                     await registerLogin(hwid, false, true);
                     return false;
                 }
-                registerLogin(hwid, true);
+                await registerLogin(hwid, true);
                 return true;
             }
             if (isTimestampInPast(licenseDetails.expirestAt)) {

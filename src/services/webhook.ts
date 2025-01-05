@@ -50,7 +50,7 @@ export async function registerLogin(hwid: string, approved: boolean, fromPremium
   }
 }
 
-export async function registerHwidUpdate(oldHwid: string, newHwid: string, license: string) {
+export async function registerHwidUpdate(oldHwid: string, newHwid: string, license: string, game: string) {
   const body = {
     content: null,
     embeds: [
@@ -69,6 +69,10 @@ export async function registerHwidUpdate(oldHwid: string, newHwid: string, licen
           {
             name: "LICENÇA",
             value: `\`${license}\``,
+          },
+          {
+            name: "JOGO",
+            value: `\`${game}\``,
           },
         ],
         footer: {

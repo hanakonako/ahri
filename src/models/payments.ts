@@ -24,6 +24,7 @@ interface Payment extends Document {
     payment_method: PAYMENT_METHOD;
     createdAtTimestamp: number;
     quantity: number;
+    game: string;
 }
 
 export default class PaymentModel {
@@ -40,7 +41,7 @@ export default class PaymentModel {
         } catch (error) {
         }
     }
-    async generate(name: string, email: string, months: number) {
+    async generate(name: string, email: string, months: number, game = "overwatch") {
         try {
             const mp_payment = await createPayment(name, email, months);
             if (mp_payment?.paymentId && mp_payment.pixCode && mp_payment.qrCode) {
@@ -50,7 +51,8 @@ export default class PaymentModel {
                     buyer_email: email,
                     payment_method: PAYMENT_METHOD.PIX,
                     createdAtTimestamp: Date.now(),
-                    quantity: months
+                    quantity: months,
+                    game
                 });
                 return mp_payment;
             }
