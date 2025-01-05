@@ -1,6 +1,6 @@
 const webhookUrl = process.env.WEBHOOK_URL as string;
 
-export async function registerLogin(hwid: string, approved: boolean) {
+export async function registerLogin(hwid: string, approved: boolean, fromPremium?: boolean) {
   const body = {
     content: null,
     embeds: [
@@ -18,6 +18,11 @@ export async function registerLogin(hwid: string, approved: boolean) {
             value: `\`${approved}\``,
             inline: true,
           },
+          {
+            name: "Pediu acesso a funções premium?",
+            value: `\`${fromPremium ? "Sim" : "Não"}\``,
+            inline: true,
+          }
         ],
         footer: {
           text: "Via CYBER API",
@@ -55,7 +60,7 @@ export async function registerHwidUpdate(oldHwid: string, newHwid: string, licen
         fields: [
           {
             name: "HWID ANTIGO",
-            value: `\`${oldHwid}\``,
+            value: `\`${oldHwid || "Nenhum"}\``,
           },
           {
             name: "HWID NOVO",

@@ -101,18 +101,23 @@ export default class LicenseModel {
         }
     }
 
-    async validateHwid(hwid: string) {
+    async validateHwid(hwid: string, premium: boolean) {
         try {
             const licenseDetails = await this.collection.findOne({ linkedHwid: hwid });
             if (!licenseDetails) {
                 await registerLogin(hwid, false);
                 return false;
             }
-            if (!licenseDetails?.expirestAt) {
-                await registerLogin(hwid, true);
+            if (!licenseDetails.expirestAt || !licenseDetails.newType) {
+                if (premium) {
+                    await registerLogin(hwid, false, true);
+                    return false;
+                }
+                registerLogin(hwid, true);
                 return true;
             }
             if (isTimestampInPast(licenseDetails.expirestAt)) {
+                await this.collection.deleteOne({ _id: licenseDetails._id });
                 await registerLogin(hwid, false);
                 return false;
             }

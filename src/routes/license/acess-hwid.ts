@@ -6,7 +6,7 @@ export default async function acessHwid(request: Request, response: Response) {
     const hwid = request.params.hwid;
 
     try {
-        const isLoginValid = await licenseModel.validateHwid(hwid);
+        const isLoginValid = await licenseModel.validateHwid(hwid, !!request.query.isPremium?.toString().length);
         if (isLoginValid) {
             return response.status(200).json({
                 message: "Login aprovado."
