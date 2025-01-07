@@ -4,7 +4,7 @@ export default async function acessHwid(request: Request, response: Response) {
     const { licenseModel } = request.models;
 
     const hwid = request.params.hwid;
-    const game = request.query.game?.toString() as "overwatch" | "marvel" || "overwatch";
+    const game = "overwatch"; // request.query.game?.toString() as "overwatch" | "marvel" || "overwatch";
     const validGames = ["overwatch", "marvel"];
     if (!validGames.includes(game)) {
         return response.status(404).json({
